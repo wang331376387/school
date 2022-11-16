@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zl.yxt.mapper.MoodMapper">
+
+    <!--根据心情编号查询配图信息-->
+    <select id="selectPicById" resultType="string">
+        select picture from `mood-picture` where mid = #{id}
+    </select>
+
+    <!--查询该心情评论个数-->
+    <select id="selectComment" resultType="integer">
+        SELECT count(mid) FROM comment WHERE mid=#{id};
+    </select>
+
+    <!--自关联查询被评论人-->
+    <select id="selectCnameByCid" resultType="string">
+        SELECT username FROM users WHERE id=(SELECT uid FROM `comment` WHERE id=#{cid});
+    </select>
+
+    <resultMap id="selectComByCid" type="com.zl.yxt.pojo.Comment">
+        <!--property实体类属性，column数据表字段-->
+        <association property="cname"
+                     javaType="string"
+                     select="selectCnameByCid"
+                     column="cid"/>
+    </resultMap>
+    <!--根据心情编号查询评论信息（按时间正序排列）-->
+    <select id="selecComById" resultMap="selectComByCid">
+        SELECT c.id,c.cid,c.mid,c.comtime,c.uid,c.`comment`,u.`username` FROM `comment` c LEFT JOIN users u ON c.uid=u.id WHERE mid=#{id} ORDER BY comtime ASC
+    </select>
+
+    <!--关联查询，查询配图和评论-->
+    <resultMap id="selectPic" type="com.zl.yxt.pojo.Moods">
+        <!--property实体类属性，column数据表字段-->
+        <id column="id" property="id"/>
+        <!--一对一查询评论个数-->
+        <association property="commentnum"
+                     javaType="integer"
+                     select="selectComment"
+                     column="id"/>
+        <!--一对多映射查询心情配图信息-->
+        <collection property="picture"
+                    ofType="string"
+                    column="id"
+                    select="selectPicById"></collection>
+        <!--查询心情评论信息-->
+        <collection property="comments" ofType="com.zl.yxt.pojo.Comment"
+                    javaType = "java.util.ArrayList" column="id"
+                    select="selecComById"></collection>
+    </resultMap>
+
+    <!--按时间倒叙查询所有心情及其作者-->
+    <select id="showAllMoods" resultMap="selectPic">
+        SELECT m.id,m.content,m.likenum,m.createtime,u.username,u.name,u.photo
+        FROM mood m
+        LEFT JOIN users u
+        ON m.uid = u.id
+        <where>
+            <if test="mid != null">
+                m.id=#{mid}
+            </if>
+        </where>
+         ORDER BY m.createtime desc
+    </select>
+
+    <!--根据登录ID查询喜欢心情编号-->
+    <select id="selectMoodIds" resultType="integer">
+        SELECT mid FROM `mood-like` WHERE uid = #{id};
+    </select>
+
+    <!--向Mood表添加心情-->
+    <insert id="insertMood">
+        insert into mood (uid,content,createtime,likenum) values (#{uid},#{content},#{createtime},#{likenum})
+    </insert>
+    <!--保存图片路径-->
+    <insert id="insertMoodPic">
+        insert into `mood-picture` (mid,picture) values (#{mid},#{picture})
+    </insert>
+    <!--查询刚刚保存的心情信息-->
+    <select id="selectInsertMood" resultType="int">
+        select id FROM `mood` where uid=#{uid} and createtime=#{createtime}
+    </select>
+    <!--保存点赞信息-->
+    <insert id="saveLike">
+        insert into `mood-like` (uid,mid) values (#{uid},#{mid})
+    </insert>
+    <!--点赞个数加一-->
+    <update id="likenum">
+        update mood set likenum=likenum+1 where id = #{id}
+    </update>
+    <!--删除点赞信息-->
+    <delete id="deleteLike">
+        delete from `mood-like` where uid=#{uid} and mid = #{mid}
+    </delete>
+
+    <!--点赞个数减一-->
+    <update id="lesslikenum">
+        update mood set likenum=likenum-1 where id = #{id}
+    </update>
+
+    <!--添加评论-->
+    <insert id="insertComment">
+        insert into `comment` (mid,cid,comment,comtime,uid) values (#{mid},#{cid},#{comment},#{comtime},#{uid})
+    </insert>
+
+    <!--查询同名文件个数-->
+    <select id="findFile" resultType="int">
+        SELECT COUNT(id) total FROM `mood-picture` WHERE picture LIKE CONCAT(#{preOriginalFilename},'%',#{fixOriginalFilename});
+    </select>
+
+</mapper>

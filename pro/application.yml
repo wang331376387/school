@@ -1,0 +1,84 @@
+swagger:
+  enabled: true
+mconfig:
+  swagger-ui-open: true
+server:
+  port: 8081
+#文件上传服务器暂存路径
+uploadpath: /home/afeng/tmp
+spring:
+  servlet:
+    multipart:
+      max-request-size: 10MB #上传文件
+      max-file-size: 10MB
+## Freemarker 配置
+  freemarker:
+    settings:
+      classic_compatible: true
+    template-loader-path: classpath:/templates/
+    cache: false
+    charset: UTF-8
+    check-template-location: true
+    content-type: text/html
+    expose-request-attributes: true
+    expose-session-attributes: true
+    request-context-attribute: request
+    suffix: .ftl
+  datasource:
+    username: yxt
+    password: 12345678
+    url: jdbc:mysql://127.0.0.1:3306/yxt?userSSL=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  hikari:
+    connection-test-query: SELECT 1 FROM DUAL
+    connection-timeout: 30000
+    maximum-pool-size: 20
+    max-lifetime: 1800000
+    minimum-idle: 5
+    connection-init-sql: SET NAMES utf8mb4
+  redis:
+    # redis数据库索引(默认为0)
+    database: 0
+    # redis服务器地址（默认为loaclhost）
+    host: 101.280.252.255
+    # redis端口（默认为6379）
+    port: 6379
+    # redis访问密码（默认为空）
+    password: 123456
+    # redis连接超时时间（单位毫秒）
+    timeout: 5000
+    # redis连接池配置
+    pool:
+      # 最大可用连接数（默认为8，负数表示无限）
+      max-active: 8
+      # 最大空闲连接数（默认为8，负数表示无限）
+      max-idle: 8
+      # 最小空闲连接数（默认为0，该值只有为正数才有用）
+      min-idle: 0
+      # 从连接池中获取连接最大等待时间（默认为-1，单位为毫秒，负数表示无限）
+      max-wait: -1
+
+# Mybatis-Plus 配置
+mybatis-plus:
+  mapper-locations: classpath:/mapper/*Mapper.xml
+  #实体扫描，多个package用逗号或者分号分隔
+  typeAliasesPackage: com.zl.yxt.pojo
+
+#阿里云OSS配置
+oss:
+  preView: https://zhjlimg.oss-cn-han89hou.alkjhncs.com/ #图片回显的头
+  endpoint: http://ossjhgHjSLLKUVZHF # AccessKey
+  keysecret: tYb66h3d98HJsR609KCJo4aRy6ZFBKps  # Accesssecret
+  bucketname: zllimg # bucket名称
+  filehost: mood/    #bucket下文件夹的路径
+#腾讯云
+txsms:
+  AppId: 14087612267 #你的系统默认应用SDK AppID
+  AppKey: b2fsjhgss0ba0fbaae2f48bc53017d1041 #你的系统默认应用App Key
+  TemplateId: 1294753 #你的正文模板ID
+  signName: 易学程序公众号 #你的签名内容
+#Minio
+minio:
+  host: http://101.280.222.255:9000/
+  uname: minioadmin
+  pwd: minioadmin

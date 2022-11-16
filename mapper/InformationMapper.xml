@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zl.yxt.mapper.InformationMapper">
+
+    <resultMap id="classes" type="com.zl.yxt.pojo.Classes">
+        <result column="id" property="value" />
+        <result column="cname" property="text" />
+    </resultMap>
+    <select id="selectClassBysid" resultMap="classes">
+        select * from class where sid = #{id}
+    </select>
+    <resultMap id="selectClass" type="com.zl.yxt.pojo.School">
+        <result column="id" property="value" />
+        <result column="scname" property="text" />
+        <collection property="children"
+                    ofType="com.zl.yxt.pojo.Classes"
+                    column="id"
+                    javaType = "java.util.ArrayList"
+                    select="selectClassBysid"></collection>
+    </resultMap>
+    <!--获取班级和年级信息-->
+    <select id="getSchoolAndClass" resultMap="selectClass">
+        select * from school
+    </select>
+
+    <!--更新用户信息（认证）-->
+    <update id="updateInfo">
+        update users set role=#{role}
+        <if test="name != null and name != ''">
+            ,name=#{name}
+        </if>
+        <if test="sid != null and sid != ''">
+            ,sid=#{sid}
+        </if>
+        <if test="cid != null and cid != ''">
+            ,cid=#{cid}
+        </if>
+        <if test="photo != null and photo != ''">
+            ,photo=#{photo}
+        </if>
+        <if test="sex != null and sex != ''">
+            ,sex=#{sex}
+        </if>
+        where id = #{id}
+    </update>
+
+    <insert id="insertClasses">
+        INSERT INTO `teacher-class` (tid,bid)
+        values
+        <foreach collection="cid" index="index" item="item" separator=",">
+            <if test="id!=null and item != null">
+                (#{id},#{item})
+            </if>
+        </foreach>
+    </insert>
+
+</mapper>
